@@ -1076,11 +1076,11 @@
                        (hexes-shift (cddr b) (- (unbox bx))))))))]
           [(< (car b) 1) (error 'binaries-tanh "Failed.")]
           [else (formula (binaries-shift b 1))])))
-;;; asinh x = atanh (x / sqrt (1 + x^2))
+;;; asinh x = log (x + sqrt (x^2 + 1))
 (define (binaries-asinh b)
   (let ([formula (lambda (x)
-      (binaries-atanh
-        (binaries/ x
+      (binaries-log
+        (binaries+ x
           (binaries-sqrt
             (binaries+ one-binaries
               (binaries-square x))))))])
@@ -1097,7 +1097,7 @@
                      (hexes-shift (cddr b) (- (unbox bx))))))))]
           [(< (car b) 2) (error 'binaries-asinh "Failed.")]
           [else (formula b)])))
-;;; acosh x = 2 atanh sqrt ((x - 1) / (x + 1))
+;;; acosh x = log (x + sqrt (x^2 - 1))
 (define binaries-acosh
   (case-lambda
     [(b) (binaries-acosh b 0)]
@@ -1111,16 +1111,13 @@
                         ($make-binaries-with-box (car b) bx h))
                   (error 'binaries-acosh "Failed."))))]
            [(and (zero? (car b)) (binaries-sqrt? b #f))
-            (let ([b (binaries- one-binaries
-                       (binaries-shift
-                         (binaries/
-                           (binaries+ one-binaries
-                             b)) 1))])
-              (if (not (binaries-sqrt? b #f))
+            (let ([x2 (binaries+ minus-one-binaries
+                        (binaries-square b))])
+              (if (not (binaries-sqrt? x2 #f))
                 (error 'binaries-acosh "Failed."))
-              (binaries-shift
-                (binaries-atanh
-                  (binaries-sqrt b index)) 1))]
+              (binaries-log
+                (binaries+ b
+                  (binaries-sqrt x2 index))))]
            [else (error 'binaries-acosh "Failed.")])]))
 ;;; atanh x = 1/2 * log ((1 + x) / (1 - x))
 (define ($binaries-atanh b)
